@@ -1,30 +1,30 @@
 # [Tiny Url - Distributed Tiny Url Generate System](http://tinyurl.vipgp88.com/)
 
-**Official website: t.vipgp88.com/tyurl -> http://tinyurl.vipgp88.com/**
+**Official website: http://t.vipgp88.com/tyurl -> http://tinyurl.vipgp88.com/**
 
 ![image](https://note.youdao.com/yws/public/resource/a10f6c43d2939f8bda1153f2e7b5dd5b/xmlnote/CAE8D2FED0A84A8AB19F6D7E70459D27/38352)
 
-**Skywalking website: t.vipgp88.com/skywk -> http://skywalking.vipgp88.com/**
+**Skywalking website: http://t.vipgp88.com/skywk -> http://skywalking.vipgp88.com/**
 
 ![image](https://note.youdao.com/yws/public/resource/03eca037c30a03584c78da6091705773/xmlnote/1CE717CFBE27416ABD5E1E68DF03CA9D/38340)
 
-**Kibana website: t.vipgp88.com/kibna -> http://kibana.vipgp88.com/**
+**Kibana website: http://t.vipgp88.com/kibna -> http://kibana.vipgp88.com/**
 
 ![image](https://note.youdao.com/yws/public/resource/f4b8161b64508802e5d4dbbbf633fc04/xmlnote/0DCF096CDB604E929B7873BE77D7D16C/38343)
 
-**Sentinel website: t.vipgp88.com/sntel -> http://sentinel.vipgp88.com/**
+**Sentinel website: http://t.vipgp88.com/sntel -> http://sentinel.vipgp88.com/**
 
 ![image](https://note.youdao.com/yws/public/resource/c18001853a2f04637fdc3499033332a3/xmlnote/9569FA6E0B0D49889906A54222D70E65/38326)
 
-**Dubbo Admin website: t.vipgp88.com/dubbo ->  http://dubbo.admin.vipgp88.com/**
+**Dubbo Admin website: http://t.vipgp88.com/dubbo ->  http://dubbo.admin.vipgp88.com/**
 
 ![image](https://note.youdao.com/yws/public/resource/e62b1ddd14e9ca4a5eed48f29991b117/xmlnote/CF7EFCA415D14C2A97FF3A5658ACDFF0/38372)
 
-**RocketMQ website: t.vipgp88.com/rktmq -> http://rocketmq.vipgp88.com/**
+**RocketMQ website: http://t.vipgp88.com/rktmq -> http://rocketmq.vipgp88.com/**
 
 ![image](https://note.youdao.com/yws/public/resource/38738ed4bb8be67ce72d9ab7d0b79d2e/xmlnote/71285707CF7A45A3A36010C532581CC8/38409)
 
-**Nacos website: t.vipgp88.com/nacos -> http://nacos.vipgp88.com/**
+**Nacos website: http://t.vipgp88.com/nacos -> http://nacos.vipgp88.com/**
 
 ![image](https://note.youdao.com/yws/public/resource/3ab76a99041fa951b429a6df0c6faee9/xmlnote/FDA7E36B45614014BCECE44277C64E65/38393)
 
