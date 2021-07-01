@@ -1,0 +1,28 @@
+/*
+left和top均设置为百分之50， margin-left为负数，值为div宽度的一半
+margin-top也为负数，值为div高度的一半
+*/
+.container {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width:300px;
+  height:100px;
+  margin-left: -150px;
+  margin-top: -60px;
+}
+
+.row{
+  float:left;
+  color: white;
+}
+
+.clear{
+  clear:both;
+}
+
+
+.main[data-v-2d9bd78e]{display:flex;display:-ms-flexbox;flex-flow:column;height:100vh}
+.background-img[data-v-2d9bd78e]{height:100vh;width:100vw;position:fixed;top:0;bottom:0;z-index:-1;background:linear-gradient(180deg,#013766,#0bc9e3 132.49%);background-color:#013766;background-attachment:fixed;background-size:cover}
+.background-img-top[data-v-2d9bd78e]{position:fixed;top:0;left:0;width:400px;height:200px}
+.background-img-bottom[data-v-2d9bd78e]{background-position:100% 100%;position:fixed;bottom:0;right:0;width:100vw;height:100vh}

@@ -1,0 +1,68 @@
+version: '3'
+
+services:
+ redis1:
+  image: publicisworldwide/redis-cluster
+  restart: always
+  volumes:
+   - /opt/redis/6379/data:/data
+  environment:
+   - REDIS_PORT=6379
+  ports:
+    - '6379:6379'       #服务端口
+    - '16379:16379'   #集群端口
+
+ redis2:
+  image: publicisworldwide/redis-cluster
+  restart: always
+  volumes:
+   - /opt/redis/6380/data:/data
+  environment:
+   - REDIS_PORT=6380
+  ports:
+    - '6380:6380'
+    - '16380:16380'
+
+ redis3:
+  image: publicisworldwide/redis-cluster
+  restart: always
+  volumes:
+   - /opt/redis/6381/data:/data
+  environment:
+   - REDIS_PORT=6381
+  ports:
+    - '6381:6381'
+    - '16381:16381'
+
+ redis4:
+  image: publicisworldwide/redis-cluster
+  restart: always
+  volumes:
+   - /opt/redis/6382/data:/data
+  environment:
+   - REDIS_PORT=6382
+  ports:
+    - '6382:6382'
+    - '16382:16382'
+
+ redis5:
+  image: publicisworldwide/redis-cluster
+  restart: always
+  volumes:
+   - /opt/redis/6383/data:/data
+  environment:
+   - REDIS_PORT=6383
+  ports:
+    - '6383:6383'
+    - '16383:16383'
+
+ redis6:
+  image: publicisworldwide/redis-cluster
+  restart: always
+  volumes:
+   - /opt/redis/6384/data:/data
+  environment:
+   - REDIS_PORT=6384
+  ports:
+    - '6384:6384'
+    - '16384:16384'

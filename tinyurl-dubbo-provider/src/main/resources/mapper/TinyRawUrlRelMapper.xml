@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.vipgp.tinyurl.dubbo.provider.dao.TinyRawUrlRelDao">
+    <resultMap id="resultMap" type="com.vipgp.tinyurl.dubbo.provider.domain.TinyRawUrlRelDO">
+        <id column="id" property="id"/>
+        <result column="base_url" property="baseUrl"/>
+        <result column="tiny_url" property="tinyUrl"/>
+        <result column="raw_url" property="rawUrl"/>
+        <result column="gmt_create" property="gmtCreate"/>
+    </resultMap>
+
+    <sql id="table">
+        tiny_raw_url_rel
+    </sql>
+
+    <insert id="add" parameterType="com.vipgp.tinyurl.dubbo.provider.domain.TinyRawUrlRelDO">
+        INSERT INTO <include refid="table"/> (id,base_url,tiny_url,raw_url) VALUES (#{id},#{baseUrl},#{tinyUrl},#{rawUrl})
+    </insert>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT IGNORE INTO <include refid="table"/> (id,base_url,tiny_url,raw_url) VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.id},#{item.baseUrl},#{item.tinyUrl},#{item.rawUrl})
+        </foreach>
+    </insert>
+
+    <select id="get" resultMap="resultMap" parameterType="com.vipgp.tinyurl.dubbo.provider.domain.TinyRawUrlRelDO">
+        SELECT id,tiny_url,raw_url,gmt_create FROM <include refid="table"/> WHERE id=#{id} and base_url=#{baseUrl}
+    </select>
+</mapper>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <Properties>
+        <property name="LOG_PATTERN"
+                  value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5level [%t] [%c{1.}:%l] [%traceId]  %m %n"/>
+        <property name="LOG_PATH" value="C:\\Users\\admin\\logs" />
+        <property name="LOG_FILE" value="tinyurl-dubbo-provider" />
+    </Properties>
+
+    <appenders>
+        <console name="Console" target="SYSTEM_OUT">
+            <!--输出日志的格式-->
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </console>
+
+    <RollingFile name="FILEOUT" fileName="${LOG_PATH}/${LOG_FILE}.log" filePattern="${LOG_PATH}/${LOG_FILE}.log.%d{yyyyMMdd}.gz">
+        <PatternLayout pattern="${LOG_PATTERN}"/>
+        <!-- DefaultRolloverStrategy属性如不设置，则默认为最多同一文件夹下7个文件开始覆盖-->
+        <DefaultRolloverStrategy max="15"/>
+        <Policies>
+            <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+        </Policies>
+    </RollingFile>
+
+    <RollingFile name="FILEOUT_SQL" fileName="${LOG_PATH}/${LOG_FILE}.sql.log"
+                 filePattern="${LOG_PATH}/${LOG_FILE}.sql.log.%d{yyyyMMdd}.gz">
+        <PatternLayout pattern="${LOG_PATTERN}"/>
+        <!-- DefaultRolloverStrategy属性如不设置，则默认为最多同一文件夹下7个文件开始覆盖-->
+        <DefaultRolloverStrategy max="15"/>
+        <Policies>
+            <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+        </Policies>
+    </RollingFile>
+
+    <RollingFile name="FILE_DUBBO_REQUEST_LOG_APPENDER" fileName="${LOG_PATH}/${LOG_FILE}.dubbo.request.log"
+                 filePattern="${LOG_PATH}/${LOG_FILE}.dubbo.request.log.%d{yyyyMMdd}.gz">
+        <PatternLayout pattern="${LOG_PATTERN}"/>
+        <!-- DefaultRolloverStrategy属性如不设置，则默认为最多同一文件夹下7个文件开始覆盖-->
+        <DefaultRolloverStrategy max="15"/>
+        <Policies>
+            <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+        </Policies>
+    </RollingFile>
+
+        <RollingFile name="FILE_TASK_LOG_APPENDER" fileName="${LOG_PATH}/${LOG_FILE}.task.log"
+                     filePattern="${LOG_PATH}/${LOG_FILE}.task.log.%d{yyyyMMdd}.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <!-- DefaultRolloverStrategy属性如不设置，则默认为最多同一文件夹下7个文件开始覆盖-->
+            <DefaultRolloverStrategy max="15"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+            </Policies>
+        </RollingFile>
+
+    </appenders>
+
+
+    <loggers>
+        <logger name="com.vipgp.tinyurl.dubbo.provider.aop.LogAspect" level="INFO" additivity="false">
+            <appender-ref ref="FILE_DUBBO_REQUEST_LOG_APPENDER"/>
+        </logger>
+
+        <logger name="ShardingSphere-SQL" level="INFO" additivity="false">
+            <appender-ref ref="FILEOUT_SQL"/>
+        </logger>
+
+        <logger name="com.vipgp.tinyurl.dubbo.provider.tasks" level="INFO" additivity="false">
+            <appender-ref ref="FILE_TASK_LOG_APPENDER"/>
+        </logger>
+
+        <root level="info">
+            <appender-ref ref="Console"/>
+            <appender-ref ref="FILEOUT"/>
+        </root>
+    </loggers>
+</configuration>

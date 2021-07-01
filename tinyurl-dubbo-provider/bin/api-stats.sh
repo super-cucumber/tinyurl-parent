@@ -1,0 +1,1 @@
+echo $(grep 'call create tiny url dubbo service with no alias code, cost' /opt/tinyurl/tinyurl-api.log | awk -F 'cost' '{print $2}' | awk -F 'ns' '{print $1}'  | awk '{total=total+$0;count++;} END{print "call create tiny url dubbo service average cost time is",  total/count/1000000, "ms"}')
