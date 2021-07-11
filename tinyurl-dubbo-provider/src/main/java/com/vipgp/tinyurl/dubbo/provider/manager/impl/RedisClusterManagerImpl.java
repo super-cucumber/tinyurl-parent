@@ -8,6 +8,7 @@ import com.vipgp.tinyurl.dubbo.provider.util.BitMapShardingUtil;
 import com.vipgp.tinyurl.dubbo.provider.util.CommonUtil;
 import com.vipgp.tinyurl.dubbo.provider.util.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scripting.support.ResourceScriptSource;
@@ -56,10 +57,14 @@ public class RedisClusterManagerImpl extends AbstractRedisManager  {
     @NacosValue(value = "${tiny.url.db.commit.sync}",autoRefreshed = true)
     private boolean dbCommitSync;
 
+    @NacosValue(value = "${redis.lua.run}",autoRefreshed = true)
+    private boolean lunRun;
+
     /**
      * calc slot base on id, then the slot will be sequential
      */
-    private boolean isSequential=true;
+    @NacosValue(value = "${redis.slot.sequential}",autoRefreshed = true)
+    private boolean isSequential;
 
     @Override
     public String set(String key, String value) {
@@ -166,13 +171,27 @@ public class RedisClusterManagerImpl extends AbstractRedisManager  {
     }
 
     @Override
+    public long del(String key){
+        long result = 0;
+
+        try {
+            result = jedis.del(key);
+        } catch (Exception e) {
+            log.error("del key:{} error",key,e);
+        }
+
+        return result;
+    }
+
+
+    @Override
     public Object runLua(String script, List<String> keys, List<String> args) {
          return jedis.eval(script, keys, args);
     }
 
     @Override
     public boolean addTinyUrlToCache(Long id, long xid, String baseUrlKey, String aliasCodeEncode, String rawUrl,
-            long newlyTinyUrlKeyExpiredSecond) {
+            long newlyTinyUrlKeyExpiredSecond, String randomValue) {
         try {
             // keys
             List<String> keys = getLuaKeys(id, xid, baseUrlKey, aliasCodeEncode, cacheUtil.getWorkerId());
@@ -186,7 +205,7 @@ public class RedisClusterManagerImpl extends AbstractRedisManager  {
             args.add(String.valueOf(xid));
             args.add(String.valueOf(newlyTinyUrlKeyExpiredSecond));
             args.add(String.valueOf(newlyTinyUrlKeyExpiredSecond));
-            args.add(String.valueOf(System.currentTimeMillis()));
+            args.add(randomValue);
 
             log.info("run add lua begin");
             // script
@@ -203,26 +222,29 @@ public class RedisClusterManagerImpl extends AbstractRedisManager  {
     }
 
     @Override
-    public boolean rollbackTinyUrlFromCache(Long id, long xid, String baseUrlKey, String aliasCodeEncode, String workerId, long messageCreateTime) {
+    public boolean rollbackTinyUrlFromCache(Long id, long xid, String baseUrlKey, String aliasCodeEncode, String workerId, String randomValue) {
         try{
             // keys
             List<String> keys = getLuaKeys(id, xid, baseUrlKey, aliasCodeEncode,workerId);
+            // add rollback key
+            String prefix = getKeyPrefix(baseUrlKey, aliasCodeEncode);
+            String rollbackKey=CommonUtil.getRollbackKey(workerId,xid,aliasCodeEncode);
+            keys.add(prefix + rollbackKey);
 
             // values
             long index = BitMapShardingUtil.calcIndex(id);
             // to list
             List<String> args = new ArrayList<>(1);
             args.add(String.valueOf(index));
-            args.add(String.valueOf(messageCreateTime));
+            args.add(randomValue);
+            args.add(aliasCodeEncode);
+            args.add(String.valueOf(rollbackConsumeKeyExpired));
 
             log.info("run rollback lua begin");
             // script
             String script = rollbackTinyUrlScriptSource.getScriptAsString();
             runLua(script, keys, args);
             log.info("run rollback lua end");
-
-            // rollback already
-            set(CommonUtil.getRollbackKey(workerId,xid,aliasCodeEncode),aliasCodeEncode,rollbackConsumeKeyExpired);
 
             return true;
         }catch (Exception ex){
@@ -239,7 +261,7 @@ public class RedisClusterManagerImpl extends AbstractRedisManager  {
         String tinyUrlKey = CommonUtil.getTinyurlKey(baseUrlKey, aliasCodeEncode);
         String txnLogKey = CommonUtil.getTxnLogKey(baseUrlKey, aliasCodeEncode, workerId, xid);
         String txnLogEndKey = CommonUtil.getTxnLogEndKey(baseUrlKey, aliasCodeEncode, workerId, xid);
-        String tinyUrlUpdateTimeKey = CommonUtil.getTinyurlUpdateTimeKey(baseUrlKey, aliasCodeEncode);
+        String tinyUrlRandomValueKey = CommonUtil.getTinyurlRandomValueKey(baseUrlKey, aliasCodeEncode);
 
         // to list
         List<String> keys = new ArrayList<>(5);
@@ -247,14 +269,14 @@ public class RedisClusterManagerImpl extends AbstractRedisManager  {
         keys.add(prefix + tinyUrlKey);
         keys.add(prefix + txnLogKey);
         keys.add(prefix + txnLogEndKey);
-        keys.add(prefix + tinyUrlUpdateTimeKey);
+        keys.add(prefix + tinyUrlRandomValueKey);
 
         return keys;
     }
 
     @Override
     public String setRawUrl(String tinyUrlKey, String value, long expiredSecond) {
-        if(whetherLuaRun()) {
+        if(lunRun) {
             // see #addTinyUrlToCache
             // baseUrlKey+"|"+code;
             String[] array=tinyUrlKey.split("|");
@@ -268,7 +290,7 @@ public class RedisClusterManagerImpl extends AbstractRedisManager  {
 
     @Override
     public String queryRawUrl(String tinyUrlKey) {
-        if(whetherLuaRun()) {
+        if(lunRun) {
             // see #addTinyUrlToCache
             // baseUrlKey+"|"+code;
             String[] array=tinyUrlKey.split("\\|");
@@ -283,7 +305,7 @@ public class RedisClusterManagerImpl extends AbstractRedisManager  {
 
     @Override
     public boolean getbit(String bitKey, long offset, String baseUrlKey, String aliasCode) {
-        if(whetherLuaRun()) {
+        if(lunRun) {
             String prefix = getKeyPrefix(baseUrlKey, aliasCode);
             String fullKey = prefix + bitKey;
             return getbit(fullKey, offset);
@@ -294,7 +316,7 @@ public class RedisClusterManagerImpl extends AbstractRedisManager  {
 
     @Override
     public String queryXid(String key, String baseUrlKey, String aliasCode) {
-        if(whetherLuaRun()) {
+        if(lunRun) {
             String prefix =getKeyPrefix(baseUrlKey, aliasCode);
             String fullyKey = prefix + key;
             return get(fullyKey);
@@ -318,7 +340,7 @@ public class RedisClusterManagerImpl extends AbstractRedisManager  {
 
     @Override
     public boolean setbit(String bitKey, long offset, boolean bitValue, String baseUrlKey, String aliasCode) {
-        if(whetherLuaRun()) {
+        if(lunRun) {
             String prefix = getKeyPrefix(baseUrlKey, aliasCode);
             String fullKey = prefix + bitKey;
             return setbit(fullKey, offset, bitValue);
@@ -327,20 +349,47 @@ public class RedisClusterManagerImpl extends AbstractRedisManager  {
         }
     }
 
-    private boolean whetherLuaRun(){
-        // if there is group commit in redis cluster env, then it will run lua
-        return  syncDelayCount > 0 && syncDelayMillis > 0 && !dbCommitSync;
+    @Override
+    public boolean unlock(String key, String expectedValue) {
+        if(lunRun) {
+            try {
+                String script = unlockScriptSource.getScriptAsString();
+                String result = (String) runLua(script, Arrays.asList(key), Arrays.asList(expectedValue));
+                return "OK".equals(result);
+            } catch (Exception ex) {
+                log.error("unlock exception key {} value {}", key, expectedValue, ex);
+                return false;
+            }
+        }else {
+            String actualValue=get(key);
+            if(expectedValue.equals(actualValue)){
+                del(key);
+                return true;
+            }
+            return false;
+        }
     }
 
     @Override
-    public boolean unlock(String key, String value) {
-        try {
-            String script = unlockScriptSource.getScriptAsString();
-            String result = (String) runLua(script, Arrays.asList(key), Arrays.asList(value));
-            return "OK".equals(result);
-        } catch (Exception ex) {
-            log.error("unlock exception key {} value {}", key, value, ex);
-            return false;
+    public boolean checkRollbackAlready(long xid, String workerId, String aliasCode, String baseUrlKey) {
+        String rollbackKey=CommonUtil.getRollbackKey(workerId, xid, aliasCode);
+        if(lunRun) {
+            String prefix = getKeyPrefix(baseUrlKey, aliasCode);
+            String fullKey = prefix + rollbackKey;
+
+            String value = get(fullKey);
+            if (StringUtils.isEmpty(value)) {
+                return false;
+            }
+
+            return true;
+        }else {
+            String value = get(rollbackKey);
+            if (StringUtils.isEmpty(value)) {
+                return false;
+            }
+
+            return true;
         }
     }
 }

@@ -6,7 +6,6 @@ import com.vipgp.tinyurl.dubbo.provider.util.BitMapShardingUtil;
 import com.vipgp.tinyurl.dubbo.provider.util.CacheUtil;
 import com.vipgp.tinyurl.dubbo.provider.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -56,6 +55,12 @@ public abstract class AbstractRedisManager implements RedisManager {
         log.info("baseUrlKey={}, code={}, updateTime={}", baseUrlKey, aliasCodeEncode, updateTime);
     }
 
+    protected void refreshTinyUrlRandomValueToCache(String baseUrlKey, String aliasCodeEncode, String randomValue, long newlyTinyUrlKeyExpiredSecond) {
+        String tinyurlRandomValueKey = CommonUtil.getTinyurlRandomValueKey(baseUrlKey, aliasCodeEncode);
+        set(tinyurlRandomValueKey, randomValue, newlyTinyUrlKeyExpiredSecond);
+        log.info("baseUrlKey={}, code={}, randomValue={}", baseUrlKey, aliasCodeEncode, randomValue);
+    }
+
     /**
      * 更新位图
      * @param id
@@ -81,6 +86,7 @@ public abstract class AbstractRedisManager implements RedisManager {
         set(key, String.valueOf(xid),newlyTinyUrlKeyExpiredSecond);
     }
 
+
     /**
      * The issue can happen that more than one clients get the same lock, if one of the below conditions meet:
      * 1. the lock expired before business run out, so the lock can be gotten by other clients
@@ -105,15 +111,5 @@ public abstract class AbstractRedisManager implements RedisManager {
     @Override
     public boolean extendLock(String key, String value, long expiredSecond) {
         return setxx(key, value, expiredSecond);
-    }
-
-    @Override
-    public boolean checkRollbackAlready(long xid, String workerId, String aliasCode) {
-        String value = get(CommonUtil.getRollbackKey(workerId, xid, aliasCode));
-        if (StringUtils.isEmpty(value)) {
-            return false;
-        }
-
-        return true;
     }
 }

@@ -20,9 +20,10 @@ public interface RedisManager {
 
     Object runLua(String script, List<String> keys, List<String> args);
 
-    boolean addTinyUrlToCache(Long id, long xid, String baseUrlKey, String aliasCodeEncode, String rawUrl, long newlyTinyUrlKeyExpiredSecond);
+    boolean addTinyUrlToCache(Long id, long xid, String baseUrlKey, String aliasCodeEncode, String rawUrl, long newlyTinyUrlKeyExpiredSecond,
+            String randomValue);
 
-    boolean rollbackTinyUrlFromCache(Long id, long xid, String baseUrlKey, String aliasCodeEncode, String workerId, long messageCreateTime);
+    boolean rollbackTinyUrlFromCache(Long id, long xid, String baseUrlKey, String aliasCodeEncode, String workerId, String randomValue);
 
     void refreshRawUrlToCache(String rawUrl, String baseUrlKey, String tinyUrl, long rawUrlKeyExpiredSecond);
 
@@ -46,5 +47,7 @@ public interface RedisManager {
 
     boolean extendLock(String key, String value, long expiredSecond);
 
-    boolean checkRollbackAlready(long xid, String workerId, String aliasCode);
+    boolean checkRollbackAlready(long xid, String workerId, String aliasCode, String baseUrlKey);
+
+    long del(String key);
 }

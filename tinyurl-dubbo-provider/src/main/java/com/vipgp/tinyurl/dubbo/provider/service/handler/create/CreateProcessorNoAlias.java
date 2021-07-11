@@ -151,8 +151,11 @@ public class CreateProcessorNoAlias extends AbstractCreateHandler {
             start = System.nanoTime();
             cacheUtil.putCheckpoint(id, Checkpoint.BEFORE_REDIS);
             CacheEvent cacheEvent = new CacheEvent();
+            String randomValue = String.valueOf(CommonUtil.random6());
+            cacheEvent.setLockValue(randomValue);
             cacheEvent = populateCacheEvent(cacheEvent, id, xid, baseUrlKey, aliasCode, rawUrl,
                     newlyTinyUrlKeyExpiredSecond, cacheUtil.getWorkerId());
+            // add to redis
             addTinyUrlToCache(cacheEvent);
             cacheUtil.putCheckpoint(id, Checkpoint.AFTER_REDIS);
             end = System.nanoTime();
@@ -208,6 +211,8 @@ public class CreateProcessorNoAlias extends AbstractCreateHandler {
         start = System.currentTimeMillis();
         cacheUtil.putCheckpoint(id, Checkpoint.BEFORE_REDIS);
         CacheEvent cacheEvent = new CacheEvent();
+        String randomValue = String.valueOf(CommonUtil.random6());
+        cacheEvent.setLockValue(randomValue);
         cacheEvent = populateCacheEvent(cacheEvent, id, xid, baseUrlKey, aliasCode, rawUrl,
                 newlyTinyUrlKeyExpiredSecond, cacheUtil.getWorkerId());
         addTinyUrlToCache(cacheEvent);

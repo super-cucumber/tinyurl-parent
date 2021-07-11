@@ -40,20 +40,20 @@ public class RollbackConsumer implements MessageListenerConcurrently {
             String randomValue = String.valueOf(CommonUtil.random6());
             try {
                 // check rollback already, avoid duplicate consume
-                if (redisManager.checkRollbackAlready(event.getXid(), event.getWorkerId(), event.getAliasCode())) {
+                if (redisManager.checkRollbackAlready(event.getXid(), event.getWorkerId(), event.getAliasCode(), event.getBaseUrlKey())) {
                     return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
                 }
 
                 boolean lockSuccess = redisManager.lock(rollbackKey, randomValue, tinyUrlLockExpired);
                 if (lockSuccess) {
                     // recheck rollback already, avoid duplicate consume
-                    if (redisManager.checkRollbackAlready(event.getXid(), event.getWorkerId(), event.getAliasCode())) {
+                    if (redisManager.checkRollbackAlready(event.getXid(), event.getWorkerId(), event.getAliasCode(), event.getBaseUrlKey())) {
                         return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
                     }
 
                     // do rollback
                     boolean isSuccess = redisManager.rollbackTinyUrlFromCache(event.getId(), event.getXid(),
-                            event.getBaseUrlKey(), event.getAliasCode(), event.getRawUrl(), item.getBornTimestamp());
+                            event.getBaseUrlKey(), event.getAliasCode(), event.getRawUrl(), event.getLockValue());
                     if (isSuccess) {
                         // unlock, it is locked in creation process and has been extended when creation failed
                         if (!StringUtils.isEmpty(event.getLockValue())) {

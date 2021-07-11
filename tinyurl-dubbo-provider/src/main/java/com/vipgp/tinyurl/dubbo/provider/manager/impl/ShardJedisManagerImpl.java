@@ -183,23 +183,24 @@ public class ShardJedisManagerImpl extends AbstractRedisManager  {
 
 
     @Override
-    public boolean addTinyUrlToCache(Long id,long xid,String baseUrlKey, String aliasCodeEncode, String rawUrl, long newlyTinyUrlKeyExpiredSecond) {
+    public boolean addTinyUrlToCache(Long id,long xid,String baseUrlKey, String aliasCodeEncode, String rawUrl, long newlyTinyUrlKeyExpiredSecond,
+            String randomValue) {
         refreshTxnXidToCache(baseUrlKey,aliasCodeEncode,xid,newlyTinyUrlKeyExpiredSecond);
         refreshIdToBitmap(id,baseUrlKey,true);
         refreshTinyUrlToCache(baseUrlKey, aliasCodeEncode, rawUrl, newlyTinyUrlKeyExpiredSecond);
-        refreshTinyUrlUpdateTimeToCache(baseUrlKey,aliasCodeEncode, System.currentTimeMillis(), newlyTinyUrlKeyExpiredSecond);
+        refreshTinyUrlRandomValueToCache(baseUrlKey,aliasCodeEncode, randomValue, newlyTinyUrlKeyExpiredSecond);
         refreshTxnXidEndToCache(baseUrlKey,aliasCodeEncode,xid,newlyTinyUrlKeyExpiredSecond);
 
         return true;
     }
 
     @Override
-    public boolean rollbackTinyUrlFromCache(Long id, long xid, String baseUrlKey, String aliasCodeEncode, String workerId, long messageCreateTime) {
+    public boolean rollbackTinyUrlFromCache(Long id, long xid, String baseUrlKey, String aliasCodeEncode, String workerId, String randomValue) {
         try {
 
-            String tinyUrlUpdateTimeKey = CommonUtil.getTinyurlUpdateTimeKey(baseUrlKey, aliasCodeEncode);
-            String updateTime = get(tinyUrlUpdateTimeKey);
-            if (!StringUtils.isEmpty(updateTime) && Long.valueOf(updateTime) > messageCreateTime) {
+            String tinyUrlRandomValueKey = CommonUtil.getTinyurlRandomValueKey(baseUrlKey, aliasCodeEncode);
+            String valueInRedis = get(tinyUrlRandomValueKey);
+            if (!StringUtils.isEmpty(valueInRedis) && !valueInRedis.equals(randomValue)) {
                 // alias code has been taken by other users, do not need rollback
                 return true;
             } else {
@@ -215,7 +216,7 @@ public class ShardJedisManagerImpl extends AbstractRedisManager  {
                 del(txnLogKey);
 
                 // del tiny url update time key
-                del(tinyUrlUpdateTimeKey);
+                del(tinyUrlRandomValueKey);
 
                 // del txn xid end key
                 String txnLogEndKey = CommonUtil.getTxnLogEndKey(baseUrlKey, aliasCodeEncode, workerId, xid);
@@ -259,7 +260,8 @@ public class ShardJedisManagerImpl extends AbstractRedisManager  {
         return setbit(key, offset, bitValue);
     }
 
-    private long del(String key){
+    @Override
+    public long del(String key){
         ShardedJedis jedis = null;
         long result = 0;
 
@@ -267,7 +269,7 @@ public class ShardJedisManagerImpl extends AbstractRedisManager  {
             jedis = shardedJedisPool.getResource();
             result = jedis.del(key);
         } catch (Exception e) {
-            log.error("get key:{} error",key,e);
+            log.error("del key:{} error",key,e);
         }finally {
             if(jedis!=null){
                 jedis.close();
@@ -275,6 +277,17 @@ public class ShardJedisManagerImpl extends AbstractRedisManager  {
         }
 
         return result;
+    }
+
+
+    @Override
+    public boolean checkRollbackAlready(long xid, String workerId, String aliasCode, String baseUrlKey) {
+        String value = get(CommonUtil.getRollbackKey(workerId, xid, aliasCode));
+        if (StringUtils.isEmpty(value)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

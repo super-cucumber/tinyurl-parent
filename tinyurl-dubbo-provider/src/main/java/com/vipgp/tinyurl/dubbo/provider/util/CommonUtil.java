@@ -46,6 +46,10 @@ public class CommonUtil {
         return baseUrlKey + "|" + code + "|" + "updated";
     }
 
+    public static String getTinyurlRandomValueKey(String baseUrlKey, String code) {
+        return baseUrlKey + "|" + code + "|" + "random";
+    }
+
     public static String[] splitTinyUrlKey(String tinyUrlKey){
         return tinyUrlKey.split("|");
     }

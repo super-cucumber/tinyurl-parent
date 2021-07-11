@@ -144,7 +144,7 @@ public abstract class AbstractCreateHandler implements CreateProcessor{
     protected void addTinyUrlToCache(CacheEvent cacheEvent) {
         try {
             redisManager.addTinyUrlToCache(cacheEvent.getId(), cacheEvent.getXid(), cacheEvent.getBaseUrlKey(), cacheEvent.getAliasCode(),
-                    cacheEvent.getRawUrl(), cacheEvent.getNewlyTinyUrlKeyExpiredSecond());
+                    cacheEvent.getRawUrl(), cacheEvent.getNewlyTinyUrlKeyExpiredSecond(), cacheEvent.getLockValue());
         } catch (Exception ex) {
             log.info("produce rollback message {}", cacheEvent.toString());
             cacheUtil.putCheckpoint(cacheEvent.getId(), Checkpoint.FAIL, true);
