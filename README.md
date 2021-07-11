@@ -207,7 +207,7 @@
 ![image](https://note.youdao.com/yws/public/resource/f863281e916bcafaf3527b0f94cde121/xmlnote/B9B52533760041079AA79777A926923A/38027)
 
 
-### 写压测结果-单机
+### 写压测结果-单机：压测了3个方案 - 1. 数据库同步方案、2. 2PC Sync P Log方案、3. 2PC Delay P Log方案（QPS最高）
 启动参数：关闭偏向锁
 
 ```
