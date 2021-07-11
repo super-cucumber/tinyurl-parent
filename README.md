@@ -172,7 +172,7 @@
 
 ##### Key Step Detail - 2PC - Delay Log - Alias Code Inputted By User
 
-![image](https://note.youdao.com/yws/public/resource/5a9029b2bd794a92c6668dd7d96b6604/xmlnote/5015B2DC29664F47AF106E7FBA03A5EF/38213)
+![image](https://note.youdao.com/yws/public/resource/c42dc47719d47a825110e0d9e029b741/xmlnote/AF64F9BC29EB4E5FA5EA0CA9B4F087C6/38638)
 
 ##### Flush Logs To DB - Task
 
